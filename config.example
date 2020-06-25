@@ -1,0 +1,11 @@
+INBOUND_BUCKET="<<my_inbound_bucket>>"
+PREDICTION_BUCKET="<<my_prediction_bucket>>"
+PREDICTION_TOPIC="<<my_prediction_topic>>"
+MODEL_ID="<<my_model_id>>"
+
+PREDICTION_THRESHOLD="0.8"
+
+PREDICT_CLOUD_FUNCTION_PATH="cloud_functions/predict"
+MOVE_CLOUD_FUNCTION_PATH="cloud_functions/move"
+PREDICT_CF_NAME="predict_pic_cf"
+MOVE_CF_NAME="move_pic_cf"
