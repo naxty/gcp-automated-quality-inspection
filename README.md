@@ -158,6 +158,7 @@ gcloud functions deploy "$MOVE_CF_NAME" \
 
 ### 3. App Engine 
 ![App Engine Application Architecture](docs/app_engine_architecture.png)
+
 We want to serve an online application that can be used for reviewing images that could not have been classified by the model.  The server is written in Python using the fastapi framework. Through the server we serve a static page that is using React to display an image and as an user we can decide if the image is defect or ok. On the server side we retrieve the image from a GCS bucket and generate a presigned url that can be loaded directly from React. 
 #### Preparation
 1. Generate a key to access. By default app engine will create a service account that can be looked up under `Service Accounts`. Usually this account is denoted as `${PROJECT_ID}@appspot.gserviceaccount.com`. We need to create a key that is used in the app engine later. Important: don't share this key with anyone nor put it in the github repository. 
