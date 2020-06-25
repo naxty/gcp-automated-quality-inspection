@@ -12,7 +12,7 @@ from cryptography.fernet import Fernet
 
 key = Fernet.generate_key()
 f = Fernet(key)
-BUCKET = os.environ['BUCKET']
+BUCKET = os.environ["BUCKET"]
 
 client = storage.Client.from_service_account_json("app_engine_service_account.json")
 
@@ -52,9 +52,7 @@ def get_need_decision_images():
             break
     if not return_blob:
         return {}
-    url = blob.generate_signed_url(
-        expiration=timedelta(seconds=60)
-    )
+    url = blob.generate_signed_url(expiration=timedelta(seconds=60))
     return {"url": url, "id": f.encrypt(str.encode(blob.name)).decode("utf-8")}
 
 

@@ -157,5 +157,20 @@ gcloud functions deploy "$MOVE_CF_NAME" \
 ```
 
 ### 3. App Engine 
+![App Engine Application Architecture](docs/app_engine_architecture.png)
+We want to serve an online application that can be used for reviewing images that could not have been classified by the model.  The server is written in Python using the fastapi framework. Through the server we serve a static page that is using React to display an image and as an user we can decide if the image is defect or ok. On the server side we retrieve the image from a GCS bucket and generate a presigned url that can be loaded directly from React. 
+#### Preparation
+1. Generate a key to access. By default app engine will create a service account that can be looked up under `Service Accounts`. Usually this account is denoted as `${PROJECT_ID}@appspot.gserviceaccount.com`. We need to create a key that is used in the app engine later. Important: don't share this key with anyone nor put it in the github repository. 
+![App Engine default account](docs/app_engine_default_service_account.png)
+2. In the storage browser we need to give the service account the role `Storage Bucket Viewer` and `Storage Legacy Bucket Writer` to view and edit blobs.
+
+#### Deployment
+1. Put the generated key inside the [app_engine folder](app_engine).
+2. Run `gcloud app deploy` and the application should be live after the deployment. You can directly open the application from the terminal with `gcloud app browse`.
+![App Engine Web Application](docs/web_application.png)
+Now we have the application running. By clicking `Ok`/`Defect` the image will be saved inside the bucket with the `ok`/`defect` label. After each click a new image will be loaded.
+
+#### Troubleshooting
+For any kind of troubleshooting of the app engine run `gcloud app logs tail -s default` to retrieve the logs.
 
 
