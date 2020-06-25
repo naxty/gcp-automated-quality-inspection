@@ -82,6 +82,79 @@ After the import we can see the images in AutoML.
 
 ### 2. Cloud Functions
 
+In this setup, we require two cloud functions. The first function classifies new images via the AutoML model and publishes the prediction result to pubsub. The second function takes the prediction results and distributes the inbound pictures accordingly.
+
+#### Prediction
+
+The [predict](cloud_functions/predict) function triggers for each picture that is uploaded to the inbound bucket. It downloads the picture and requests a classification from the AutoML model. Because the model response is serialized with [protocol buffers](https://developers.google.com/protocol-buffers) we utilise the python package [protobuf-to-dict](https://pypi.org/project/protobuf-to-dict/) to deserialize the response in python. Finally, the result of the classification is published to a pubsub topic with messages of the following form.
+```
+msg = {
+    "bucket_name": data["bucket"],
+    "pic_name": data["name"],
+    "prediction_label": result.get("display_name"),
+    "prediction_score": result.get("classification").get("score"),
+}
+```
+In order to deploy the function we require the environment variables
+```
+export MODEL_ID="ICN690530685638672384"
+
+export INBOUND_BUCKET="pump_impeller_inbound_bucket"
+export PREDICTION_TOPIC="automl_predictions"
+export PREDICT_CLOUD_FUNCTION_PATH="cloud_functions/predict"
+export PREDICT_CF_NAME="predict_pic_cf"
+```
+Here, the `MODEL_ID` is specified by the deployed AutoML model from the previous step.  Whereas the names for the bucket `INBOUND_BUCKET` and pubsub topic name `PREDICTION_TOPIC` can be chosen freely.
+ Furthermore, the values for `PREDICT_CLOUD_FUNCTION_PATH` and `PREDICT_CF_NAME` don't have to be changed.
+
+Then, we can deploy the cloud function using
+```
+gcloud functions deploy "$PREDICT_CF_NAME" \
+ --source "$PREDICT_CLOUD_FUNCTION_PATH" \
+ --runtime python37 \
+ --trigger-resource "$INBOUND_BUCKET" \
+ --trigger-event google.storage.object.finalize \
+ --set-env-vars model_id="$MODEL_ID",topic_id="$PREDICTION_TOPIC"
+```
+
+#### Moving
+
+The [move](cloud_functions/move) function triggers for new events on the pubsub topic. Because we obtain the events from the topic directly we first have to decode the [base64](https://docs.python.org/3/library/base64.html) encoded events. Then, the function moves the picture into the respective subfolder in the prediction bucket and deletes it from the inbound bucket. Here, we explicitly check if the prediction score is above a given threshold. Because we only trust predictions with a high score for automated processing. We move images with low score into a special folder for manual postprocessing. The resulting folder structure looks as follows.   
+```
+prediction_bucket
+├── ok
+│   └── new_pic_4566.jpeg
+│   └── new_pic_2353.jpeg
+│   └── ...
+├── defect
+│   └── new_pic_3546.jpeg
+│   └── new_pic_2453.jpeg
+│   └── ...
+└── unlcear
+    └── new_pic_1452.jpeg
+    └── new_pic_1245.jpeg
+    └── ...
+```
+
+
+We require the following environment variables for deploying the function.
+```
+INBOUND_BUCKET="pump_impeller_inbound_bucket"
+PREDICTION_THRESHOLD="0.8"
+
+MOVE_CLOUD_FUNCTION_PATH="cloud_functions/move"
+MOVE_CF_NAME="move_pic_cf"
+```
+Here, the name for the bucket `INBOUND_BUCKET` can be chosen freely. The `PREDICTION_THRESHOLD` defines the threshold for predictions that we consider unclear. Again, the values for `MOVE_CLOUD_FUNCTION_PATH` and `MOVE_CF_NAME` don't have to be changed.
+
+Finally we can deploy the function with
+```
+gcloud functions deploy "$MOVE_CF_NAME" \
+ --source "$MOVE_CLOUD_FUNCTION_PATH" \
+ --runtime python37 \
+ --trigger-topic "$PREDICTION_TOPIC" \
+ --set-env-vars prediction_bucket="$PREDICTION_BUCKET",prediction_threshold="$PREDICTION_THRESHOLD"
+```
 
 ### 3. App Engine 
 
