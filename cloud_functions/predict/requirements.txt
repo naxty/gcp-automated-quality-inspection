@@ -1,0 +1,4 @@
+google-cloud-storage 
+google-cloud-automl
+google-cloud-pubsub
+protobuf3-to-dict
