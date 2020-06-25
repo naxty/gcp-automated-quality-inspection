@@ -1,19 +1,22 @@
+import os
+from typing import List
+from enum import Enum
+from datetime import timedelta
+
 from google.cloud import storage
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import HTMLResponse, FileResponse
-from typing import List
-from enum import Enum
-from datetime import timedelta
 from cryptography.fernet import Fernet
 
 key = Fernet.generate_key()
 f = Fernet(key)
-BUCKET_NAME = "product-quality"
-client = storage.Client()
+BUCKET = os.environ['BUCKET']
 
-bucket = client.get_bucket(BUCKET_NAME)
+client = storage.Client.from_service_account_json("app_engine_service_account.json")
+
+bucket = client.get_bucket(BUCKET)
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -49,7 +52,9 @@ def get_need_decision_images():
             break
     if not return_blob:
         return {}
-    url = blob.generate_signed_url(expiration=timedelta(seconds=60))
+    url = blob.generate_signed_url(
+        expiration=timedelta(seconds=60)
+    )
     return {"url": url, "id": f.encrypt(str.encode(blob.name)).decode("utf-8")}
 
 
