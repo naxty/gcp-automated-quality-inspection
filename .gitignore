@@ -1,2 +1,4 @@
 *.jpeg
 *.zip
+__pycache__/
+*$py.class
