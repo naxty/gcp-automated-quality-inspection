@@ -3,3 +3,5 @@ entrypoint: gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker
 instance_class: B1
 manual_scaling:
     instances: 1
+env_variables:
+    BUCKET: "product-quality"
