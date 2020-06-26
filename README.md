@@ -198,9 +198,10 @@ We want to serve an online application that can be used for reviewing images tha
 #### Deployment
 1. Ensure that the generated key `app_engine_service_account.json` is inside the [app_engine folder](app_engine/).
 2. Change the bucket name in [app.yaml](app_engine/app.yaml).
-2. Run `gcloud app deploy app_engine/app.yaml` and the application should be live after in a few seconds. You can directly open the application from the terminal with `gcloud app browse`.
+3. Run `gcloud app deploy app_engine/app.yaml` and the application should be live after in a few seconds. You can directly open the application from the terminal with `gcloud app browse`.
 ![App Engine Web Application](docs/web_application.png)
 Now we have the application running. By clicking `Ok`/`Defect` the image will be saved inside the bucket with the `ok`/`defect` label. After each click a new image will be loaded.
+4. 
 
 #### Troubleshooting
 For any kind of troubleshooting of the app engine run `gcloud app logs tail -s default` to retrieve the logs.
