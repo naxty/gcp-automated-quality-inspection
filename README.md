@@ -1,4 +1,6 @@
 # Google Cloud Platform Automated Image Quality Inspection
+![Architecture](docs/highlevel_architecture.png)
+
 This repository is showcase about how to leverage google cloud platform to quickly train and deploy a machine learning project. We are using different components of gcp such as [App Engine](https://cloud.google.com/appengine), [AutoML](https://cloud.google.com/automl), [Cloud Storage](https://cloud.google.com/storage), [Cloud Pub/Sub](https://cloud.google.com/pubsub) and [Cloud Functions](https://cloud.google.com/functions) are used to implement an end-to-end machine learning project. Based on this [dataset](https://www.kaggle.com/ravirajsinh45/real-life-industrial-dataset-of-casting-product) we train an AutoML image classification model and deploy it through AutoML.
 
 ## Overview
@@ -130,7 +132,7 @@ prediction_bucket
 │   └── new_pic_3546.jpeg
 │   └── new_pic_2453.jpeg
 │   └── ...
-└── unlcear
+└── unclear
     └── new_pic_1452.jpeg
     └── new_pic_1245.jpeg
     └── ...
