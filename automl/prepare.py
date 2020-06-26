@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from google.cloud import storage
 
-BUCKET_NAME = os.environ["BUCKET_NAME"]
+BUCKET_NAME = os.environ["TRAINING_DATA_BUCKET"]
 
 client = storage.Client()
 bucket = client.get_bucket(BUCKET_NAME)

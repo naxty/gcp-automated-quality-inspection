@@ -7,7 +7,7 @@ from google.cloud import automl_v1beta1
 from google.cloud import pubsub_v1
 
 
-def predict_pic_cf(data, context):
+def predict_image(data, context):
     print("Event ID: {}".format(context.event_id))
     print("Event type: {}".format(context.event_type))
     print("Bucket: {}".format(data["bucket"]))
@@ -45,7 +45,7 @@ def get_pubsub_msg_from_response(data, response):
     result = serialized.get("payload")[0]
     msg = {
         "bucket_name": data["bucket"],
-        "pic_name": data["name"],
+        "image_name": data["name"],
         "prediction_label": result.get("display_name"),
         "prediction_score": result.get("classification").get("score"),
     }

@@ -5,7 +5,7 @@ import os
 from google.cloud import storage
 
 
-def move_pic_cf(event, context):
+def move_image(event, context):
     print(
         f"This Function was triggered by messageId {context.event_id} published at {context.timestamp}"
     )
@@ -37,7 +37,7 @@ def decode_data(data):
     print("msg dict: ", msg)
     return (
         msg["bucket_name"],
-        msg["pic_name"],
+        msg["image_name"],
         msg["prediction_label"],
         msg["prediction_score"],
     )
@@ -58,7 +58,7 @@ def get_blob_folder_by_prediction(
 ):
     folder_name = prediction_label
     if prediction_score < prediction_threshold:
-        folder_name = "undecided"
+        folder_name = "unclear"
     return folder_name
 
 

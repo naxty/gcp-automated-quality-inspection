@@ -43,8 +43,7 @@ class Decision(BaseModel):
 
 @app.get("/need_decision", response_model=dict)
 def get_need_decision_images():
-    blobs = list(bucket.list_blobs(prefix="predictions/undecided/"))
-    decisions = []
+    blobs = list(bucket.list_blobs(prefix="unclear/"))
     return_blob = None
     for blob in blobs:
         if ".jpeg" in blob.name:
@@ -52,8 +51,8 @@ def get_need_decision_images():
             break
     if not return_blob:
         return {}
-    url = blob.generate_signed_url(expiration=timedelta(seconds=60))
-    return {"url": url, "id": f.encrypt(str.encode(blob.name)).decode("utf-8")}
+    url = return_blob.generate_signed_url(expiration=timedelta(seconds=60))
+    return {"url": url, "id": f.encrypt(str.encode(return_blob.name)).decode("utf-8")}
 
 
 @app.post("/make_decision")
@@ -66,7 +65,7 @@ def make_decision(decision: Decision):
 
     value = decision.decision
     new_blob_name = f"{value}_{blob.name}"
-    bucket.rename_blob(blob, f"predictions/human_decided/{new_blob_name}")
+    bucket.rename_blob(blob, f"human_decided/{new_blob_name}")
     return 200
 
 

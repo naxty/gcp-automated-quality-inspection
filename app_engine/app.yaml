@@ -4,4 +4,4 @@ instance_class: B1
 manual_scaling:
     instances: 1
 env_variables:
-    BUCKET: "product-quality"
+    BUCKET: "product-quality-prediction"
