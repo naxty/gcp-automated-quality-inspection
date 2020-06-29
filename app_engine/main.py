@@ -64,7 +64,8 @@ def make_decision(decision: Decision):
         raise HTTPException(status_code=404, detail="Blob not found")
 
     value = decision.decision
-    new_blob_name = f"{value}_{blob.name}"
+    _, name = os.path.split(blob.name)
+    new_blob_name = f"{value}_{name}"
     bucket.rename_blob(blob, f"human_decided/{new_blob_name}")
     return 200
 

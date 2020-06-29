@@ -206,8 +206,24 @@ The server is written in Python using the [fastapi](https://fastapi.tiangolo.com
 3. Run `gcloud app deploy app_engine/app.yaml` and the application should be live after a few seconds. You can directly open the application from the terminal with `gcloud app browse`.
 ![App Engine Web Application](docs/web_application.png)
 Now we have the application running. By clicking `Ok`/`Defect` the image will be saved inside the bucket with the `ok`/`defect` label. After each click a new image will be loaded.
+4. After the manual decision was made the app moves the image to the folder `human_decided` inside the `PREDICTION_BUCKET` with the prefix of the label.
+    ```
+    prediction_bucket
+    ├── ok
+    │   └── ...
+    ├── defect
+    │   └── ...
+    ├── unclear
+    │   └── ...
+    └── human_decided
+        └── ok_new_pic_1452.jpeg   
+        └── defect_new_pic_1453.jpeg
+    ```
 
 #### Troubleshooting
 For any kind of troubleshooting of the app engine run `gcloud app logs tail -s default` to retrieve the logs.
+
+#### Testing
+The simplest way to test the web application is to put an image inside the `$PREDITION_BUCKET/unclear`. 
 
 
