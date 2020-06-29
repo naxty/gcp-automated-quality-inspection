@@ -2,6 +2,6 @@
 *.zip
 __pycache__/
 *$py.class
-.idea/*
+.idea/**
 config
 app_engine/app_engine_service_account.json

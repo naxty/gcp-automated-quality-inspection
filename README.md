@@ -1,7 +1,10 @@
-# Google Cloud Platform Automated Image Quality Inspection
+# Google Cloud Platform Automated Quality Inspection
 ![Architecture](docs/highlevel_architecture.png)
 
-This repository is a showcase about how to leverage the Google Cloud Platform (GCP) to train and deploy a machine learning project without any deep knowledge about machine learning frameworks. We are using different components of GCP such as [Cloud Storage](https://cloud.google.com/storage), [AutoML](https://cloud.google.com/automl), [Cloud Functions](https://cloud.google.com/functions), [Cloud Pub/Sub](https://cloud.google.com/pubsub) and [App Engine](https://cloud.google.com/appengine) are used to implement an end-to-end machine learning project. Based on this [product image data for quality insepection](https://www.kaggle.com/ravirajsinh45/real-life-industrial-dataset-of-casting-product) we train an AutoML image classification model and deploy it through AutoML.
+This repository is a showcase about how to leverage the Google Cloud Platform (GCP) to train and deploy a machine learning project without any deep knowledge about machine learning frameworks. 
+ The underlying use case is automated detection of defect components in manufacturing. For this purpose we upload pictures of the components to GCP. Then, we classify the image using a machine learning model. Images that are not classified with sufficient certainty by the model can be manually postprocessed using a simple user interface.
+
+We utilizing different services of GCP such as [Cloud Storage](https://cloud.google.com/storage), [AutoML](https://cloud.google.com/automl), [Cloud Functions](https://cloud.google.com/functions), [Cloud Pub/Sub](https://cloud.google.com/pubsub) and [App Engine](https://cloud.google.com/appengine) to implement the machine learning system. The AutoML image classification model is trained on the [product image data for quality insepection](https://www.kaggle.com/ravirajsinh45/real-life-industrial-dataset-of-casting-product).
 
 ## Overview
 - [app_engine](app_engine/): Demo application for deployment. For the implementation we use [fastapi](https://fastapi.tiangolo.com/) and [React](https://reactjs.org/) and deploy it on the [App Engine](https://cloud.google.com/appengine).
@@ -22,11 +25,11 @@ In the project enable the APIs for AutoML, GCS, Cloud Functions, App Engine and 
 Furthermore, you need a python 3.7 environment (conda or virtual env) with libraries specified in [requirements.txt](requirements.txt). You can install them with `pip install -r requirements.txt`.
 
 ## Tutorial
-There are  parts in this tutorial. We need to set the following configurations:
+The tutorial consists three parts.
 
 ### 1. AutoML Preparation, Training and Deployment
 
-Before we can train the AutoML Model we need to upload the data to GCS and prepare a CSV file with the location and labels of the data. Since AutoML is only available in the region `US-CENTRAL1`. Hence, we create a bucket in this region. Here, we require the environment variables.
+Before we can train the AutoML Model we need to upload the data to GCS and prepare a CSV file with the location and labels of the data. Since AutoML is only available in the region `US-CENTRAL1`, we create a bucket in this region. Here, we require the environment variables.
 ```sh
 export BUCKET_LOCATION="US-CENTRAL1"
 export TRAINING_DATA_BUCKET="product-quality"
@@ -88,7 +91,7 @@ gsutil cp preparation.csv gs://$BUCKET_NAME
 After the import we can see the images in AutoML.
 ![AutoML view images](docs/automl_view_images.png) 
 
-6. For the training of the model we will select the *Cloud hosted* option. This has the benefit that the model can be deployed directly inside GCP. We set the *node hour budget* to 8 which is the minimum amount of node hours. Be careful here because the costs are \$3.15 per node hour. In our case, the maximum cost is \$25.2. Based on the validation dataset, if the improvement of the model steps are too slow AutoML will stop the training and you are only charged for the training time. After the training we can evaluate the model, inspect the results and deploy the model. 
+6. For the training of the model we select the *Cloud hosted* option. This has the benefit that the model can be deployed directly inside GCP. We set the *node hour budget* to 8 which is the minimum amount of node hours. Be careful with this setting because the costs are \$3.15 per node hour. In our case, the maximum cost is capped at \$25.2. Based on the performance of the model on the validation dataset, AutoML will stop the training and you are only charged for the actual training time. After the training we can evaluate the model, inspect the results and deploy the model. 
 ![AutoML view images](docs/automl_evaluate.png) 
 
 ### 2. Cloud Functions
@@ -140,7 +143,7 @@ gcloud functions deploy "$PREDICT_CF_NAME" \
 
 #### Moving
 
-The [move](cloud_functions/move) function triggers for new events on the Pub/Sub topic. Because we obtain the events from the topic directly we first have to decode the [base64](https://docs.python.org/3/library/base64.html) encoded events. Then, the function moves the picture into the respective subfolder in the prediction bucket and deletes it from the inbound bucket. Here, we explicitly check if the prediction score is above a given threshold. Because we only trust predictions with a high score for automated processing. We move images with low score into a special folder for manual postprocessing. The resulting folder structure looks as follows.   
+The [move](cloud_functions/move) function triggers for new events on the Pub/Sub topic. Because we obtain the events from the topic directly we first have to decode the [base64](https://docs.python.org/3/library/base64.html) encoded events. Then, the function moves the picture into the respective subfolder in the prediction bucket and deletes it from the inbound bucket. Here, we explicitly check if the prediction score is above a given threshold. We move images with low score into a special folder for manual postprocessing because we only trust predictions with a high score for automated processing. The resulting folder structure looks as follows.   
 ```
 prediction_bucket
 ├── ok
@@ -186,22 +189,23 @@ gcloud functions deploy "$MOVE_CF_NAME" \
 ### 3. App Engine 
 ![App Engine Application Architecture](docs/app_engine_architecture.png)
 
-We want to serve an online application that can be used for reviewing images that have been classified by the model with a score below the threshold. The server is written in Python using the [fastapi](https://fastapi.tiangolo.com/) framework. Through the server we serve a static page that is using React to display an image and as an user we can decide if the image is `defect` or `ok`. On the server side we retrieve the image from the `PREDICTION_BUCKET` and generate a pre-signed url that can be loaded directly from React. The server is deployed with App Engine. 
+We serve an online application that can be used for reviewing images in the `unclear` folder, i.e., that have been classified by the model with a score below the chosen threshold. 
+
+The server is written in Python using the [fastapi](https://fastapi.tiangolo.com/) framework. Through the server we serve a static page that is using React to display an image and as an user we can decide if the image is `defect` or `ok`. On the server side we retrieve the image from the `PREDICTION_BUCKET` and generate a pre-signed url that can be loaded directly from React. The server is deployed with App Engine. 
 
 #### Preparation
 1. First, we require a key to access GCS from App Engine. By default App Engine will create a service account that can be looked up under `Service Accounts`. Usually this account is named as `${PROJECT_ID}@appspot.gserviceaccount.com`. Download the key put in inside the [app_engine folder](app_engine/) with the name `app_engine_service_account.json`. Important: don't share this key with anyone nor put it in the github repository. 
 ![App Engine default account](docs/app_engine_default_service_account.png)
-2. In the storage browser we need to give the service account the role `Storage Object Viewer` and `Storage Legacy Bucket Writer` to view and edit blobs.
-3. In the IAM give the service account the role `Service Account Token Creator`
+2. In the storage browser we need to give the service account the role `Storage Object Viewer` and `Storage Legacy Bucket Writer` for the `PREDICTION_BUCKET` to view and edit blobs.
+3. In the IAM give the service account the role `Service Account Token Creator` to allow the generation of the pre-signed urls. 
 ![Service_Account_Token_Creator_IAM](docs/app_engine_iam_service_account_creator_token.png)
 
 #### Deployment
 1. Ensure that the generated key `app_engine_service_account.json` is inside the [app_engine folder](app_engine/).
-2. Change the bucket name in [app.yaml](app_engine/app.yaml).
-3. Run `gcloud app deploy app_engine/app.yaml` and the application should be live after in a few seconds. You can directly open the application from the terminal with `gcloud app browse`.
+2. Adjust the bucket name in [app.yaml](app_engine/app.yaml).
+3. Run `gcloud app deploy app_engine/app.yaml` and the application should be live after a few seconds. You can directly open the application from the terminal with `gcloud app browse`.
 ![App Engine Web Application](docs/web_application.png)
 Now we have the application running. By clicking `Ok`/`Defect` the image will be saved inside the bucket with the `ok`/`defect` label. After each click a new image will be loaded.
-4. 
 
 #### Troubleshooting
 For any kind of troubleshooting of the app engine run `gcloud app logs tail -s default` to retrieve the logs.
