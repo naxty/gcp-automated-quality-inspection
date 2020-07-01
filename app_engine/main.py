@@ -46,7 +46,7 @@ def get_need_decision_images():
     blobs = list(bucket.list_blobs(prefix="unclear/"))
     return_blob = None
     for blob in blobs:
-        if ".jpeg" in blob.name:
+        if ".jpeg" in blob.name or ".jpg" in blob.name:
             return_blob = blob
             break
     if not return_blob:
