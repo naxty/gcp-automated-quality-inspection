@@ -142,6 +142,8 @@ gcloud functions deploy "$PREDICT_CF_NAME" \
  --set-env-vars model_id="$MODEL_ID",topic_id="$PREDICTION_TOPIC"
 ```
 
+When you get an error that `service-<project-number>@gcf-admin-robot.iam.gserviceaccount.com does not have storage.objects.create access to the Google Cloud Storage object.` please add the `Storage Object Creator` to the service account. Also, allow unauthenticated invocations of new function. 
+
 #### Moving
 
 The [move](cloud_functions/move) function triggers for new events on the Pub/Sub topic. Because we obtain the events from the topic directly we first have to decode the [base64](https://docs.python.org/3/library/base64.html) encoded events. Then, the function moves the picture into the respective subfolder in the prediction bucket and deletes it from the inbound bucket. Here, we explicitly check if the prediction score is above a given threshold. We move images with low score into a special folder for manual postprocessing because we only trust predictions with a high score for automated processing. The resulting folder structure looks as follows.   
