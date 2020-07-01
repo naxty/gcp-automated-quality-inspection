@@ -29,12 +29,13 @@ The tutorial consists three parts.
 
 ### 1. AutoML Preparation, Training and Deployment
 
-Before we can train the AutoML Model we need to upload the data to GCS and prepare a CSV file with the location and labels of the data. Since AutoML is only available in the region `US-CENTRAL1`, we create a bucket in this region. Here, we require the environment variables.
+Before we can train the AutoML Model we need to upload the data to GCS and prepare a CSV file with the location and labels of the data. Since AutoML is only available in the region `US-CENTRAL1`, we create a bucket in this region. Here, we require the environment variables. Bucket names in GCP are unique, therefore we prefix all bucket names with your - also unique - GCP project ID. 
+
 ```sh
-export BUCKET_LOCATION="US-CENTRAL1"
-export TRAINING_DATA_BUCKET="product-quality"
+export GCP_REGION="US-CENTRAL1"
+export GCP_PROJECT_ID="<fill-with-your-project-id>"
+export TRAINING_DATA_BUCKET="$GCP_PROJECT_ID""-product-quality"
 ``` 
-Bucket names in GCP are unique, therefore you probably need to change it.
 
 1. Download the [dataset](https://www.kaggle.com/ravirajsinh45/real-life-industrial-dataset-of-casting-product) and put it inside the [data](data/)-folder. Extract the zip file.
 ```
@@ -58,7 +59,7 @@ data
 
 2. Create a GCS bucket and upload the data:
 ```sh
-gsutil mb -l $BUCKET_LOCATION gs://"${TRAINING_DATA_BUCKET}"
+gsutil mb -l $GCP_REGION gs://"${TRAINING_DATA_BUCKET}"
 gsutil -m cp -r data/ gs://"${TRAINING_DATA_BUCKET}"
 ```
 
@@ -74,13 +75,13 @@ python automl/prepare.py
 
 Finally, we need to upload this CSV file into the GCS with the following command:
 ```sh
-tail automl/preparation.csv
+tail preparation.csv
 ...
 TRAIN,gs://product-quality/data/casting_data/train/def_front/cast_def_0_3105.jpeg,Defect
 VALIDATION,gs://product-quality/data/casting_data/train/def_front/cast_def_0_3107.jpeg,Defect
 TEST,gs://product-quality/data/casting_data/test/ok_front/cast_ok_0_9996.jpeg,Ok
 
-gsutil cp preparation.csv gs://$BUCKET_NAME
+gsutil cp preparation.csv gs://$TRAINING_DATA_BUCKET
 ```
 
 4. Create a dataset in AutoML Vision. Assign it a name and select *Single-Label Classification* 
@@ -115,7 +116,7 @@ In order to deploy the function we require the environment variables
 ```
 export MODEL_ID="ICN690530685638672384"
 
-export INBOUND_BUCKET="product-quality-inbound"
+export INBOUND_BUCKET="$GCP_PROJECT_ID""-product-quality-inbound"
 export PREDICTION_TOPIC="automl_predictions"
 export PREDICT_CLOUD_FUNCTION_PATH="cloud_functions/predict"
 export PREDICT_CF_NAME="predict_image"
@@ -125,7 +126,7 @@ Here, the `MODEL_ID` is specified by the deployed AutoML model from the previous
 
 We create the bucket and the Pub/Sub topic with
 ```
-gsutil mb -l $BUCKET_LOCATION gs://"${INBOUND_BUCKET}"
+gsutil mb -l $GCP_REGION gs://"${INBOUND_BUCKET}"
 ```
 and
 ```
@@ -140,6 +141,8 @@ gcloud functions deploy "$PREDICT_CF_NAME" \
  --trigger-event google.storage.object.finalize \
  --set-env-vars model_id="$MODEL_ID",topic_id="$PREDICTION_TOPIC"
 ```
+
+When you get an error that `service-<project-number>@gcf-admin-robot.iam.gserviceaccount.com does not have storage.objects.create access to the Google Cloud Storage object.` please add the `Storage Object Creator` to the service account. Also, allow unauthenticated invocations of new function. 
 
 #### Moving
 
@@ -163,7 +166,7 @@ prediction_bucket
 
 We require the following environment variables for deploying the function.
 ```
-export PREDICTION_BUCKET="product-quality-prediction"
+export PREDICTION_BUCKET="$GCP_PROJECT_ID""-product-quality-prediction"
 export PREDICTION_THRESHOLD="0.8"
 
 export MOVE_CLOUD_FUNCTION_PATH="cloud_functions/move"
@@ -173,7 +176,7 @@ Here, the name for the bucket `PREDICTION_BUCKET` can be chosen freely. The `PRE
 
 We create the prediction bucket with
 ```
-gsutil mb -l $BUCKET_LOCATION gs://"${PREDICTION_BUCKET}"
+gsutil mb -l $GCP_REGION gs://"${PREDICTION_BUCKET}"
 ```
 
 
