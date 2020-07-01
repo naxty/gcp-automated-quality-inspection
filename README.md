@@ -197,8 +197,7 @@ The server is written in Python using the [fastapi](https://fastapi.tiangolo.com
 #### Preparation
 1. First, we require a key to access GCS from App Engine. By default App Engine will create a service account that can be looked up under `Service Accounts`. Usually this account is named as `${PROJECT_ID}@appspot.gserviceaccount.com`. Download the key put in inside the [app_engine folder](app_engine/) with the name `app_engine_service_account.json`. Important: don't share this key with anyone nor put it in the github repository. 
 ![App Engine default account](docs/app_engine_default_service_account.png)
-2. In the storage browser we need to give the service account the role `Storage Object Viewer` and `Storage Legacy 
-Writer` for the `PREDICTION_BUCKET` to view and edit blobs.
+2. In the storage browser we need to give the service account the role `Storage Object Viewer` and `Storage Legacy Writer` for the `PREDICTION_BUCKET` to view and edit blobs.
 3. In the IAM give the service account the role `Service Account Token Creator` to allow the generation of the pre-signed urls. 
 ![Service_Account_Token_Creator_IAM](docs/app_engine_iam_service_account_creator_token.png)
 
