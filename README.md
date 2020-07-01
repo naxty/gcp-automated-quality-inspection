@@ -74,13 +74,13 @@ python automl/prepare.py
 
 Finally, we need to upload this CSV file into the GCS with the following command:
 ```sh
-tail automl/preparation.csv
+tail preparation.csv
 ...
 TRAIN,gs://product-quality/data/casting_data/train/def_front/cast_def_0_3105.jpeg,Defect
 VALIDATION,gs://product-quality/data/casting_data/train/def_front/cast_def_0_3107.jpeg,Defect
 TEST,gs://product-quality/data/casting_data/test/ok_front/cast_ok_0_9996.jpeg,Ok
 
-gsutil cp preparation.csv gs://$BUCKET_NAME
+gsutil cp preparation.csv gs://$TRAINING_DATA_BUCKET
 ```
 
 4. Create a dataset in AutoML Vision. Assign it a name and select *Single-Label Classification* 
