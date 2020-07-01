@@ -29,12 +29,13 @@ The tutorial consists three parts.
 
 ### 1. AutoML Preparation, Training and Deployment
 
-Before we can train the AutoML Model we need to upload the data to GCS and prepare a CSV file with the location and labels of the data. Since AutoML is only available in the region `US-CENTRAL1`, we create a bucket in this region. Here, we require the environment variables.
+Before we can train the AutoML Model we need to upload the data to GCS and prepare a CSV file with the location and labels of the data. Since AutoML is only available in the region `US-CENTRAL1`, we create a bucket in this region. Here, we require the environment variables. Bucket names in GCP are unique, therefore we prefix all bucket names with your - also unique - GCP project ID. 
+
 ```sh
 export BUCKET_LOCATION="US-CENTRAL1"
-export TRAINING_DATA_BUCKET="product-quality"
+export GCP_PROJECT_ID="<fill-with-your-project-id>"
+export TRAINING_DATA_BUCKET="$GCP_PROJECT_ID""-product-quality"
 ``` 
-Bucket names in GCP are unique, therefore you probably need to change it.
 
 1. Download the [dataset](https://www.kaggle.com/ravirajsinh45/real-life-industrial-dataset-of-casting-product) and put it inside the [data](data/)-folder. Extract the zip file.
 ```
@@ -115,7 +116,7 @@ In order to deploy the function we require the environment variables
 ```
 export MODEL_ID="ICN690530685638672384"
 
-export INBOUND_BUCKET="product-quality-inbound"
+export INBOUND_BUCKET="$GCP_PROJECT_ID""-product-quality-inbound"
 export PREDICTION_TOPIC="automl_predictions"
 export PREDICT_CLOUD_FUNCTION_PATH="cloud_functions/predict"
 export PREDICT_CF_NAME="predict_image"
@@ -163,7 +164,7 @@ prediction_bucket
 
 We require the following environment variables for deploying the function.
 ```
-export PREDICTION_BUCKET="product-quality-prediction"
+export PREDICTION_BUCKET="$GCP_PROJECT_ID""-product-quality-prediction"
 export PREDICTION_THRESHOLD="0.8"
 
 export MOVE_CLOUD_FUNCTION_PATH="cloud_functions/move"
@@ -196,7 +197,8 @@ The server is written in Python using the [fastapi](https://fastapi.tiangolo.com
 #### Preparation
 1. First, we require a key to access GCS from App Engine. By default App Engine will create a service account that can be looked up under `Service Accounts`. Usually this account is named as `${PROJECT_ID}@appspot.gserviceaccount.com`. Download the key put in inside the [app_engine folder](app_engine/) with the name `app_engine_service_account.json`. Important: don't share this key with anyone nor put it in the github repository. 
 ![App Engine default account](docs/app_engine_default_service_account.png)
-2. In the storage browser we need to give the service account the role `Storage Object Viewer` and `Storage Legacy Bucket Writer` for the `PREDICTION_BUCKET` to view and edit blobs.
+2. In the storage browser we need to give the service account the role `Storage Object Viewer` and `Storage Legacy 
+Writer` for the `PREDICTION_BUCKET` to view and edit blobs.
 3. In the IAM give the service account the role `Service Account Token Creator` to allow the generation of the pre-signed urls. 
 ![Service_Account_Token_Creator_IAM](docs/app_engine_iam_service_account_creator_token.png)
 
