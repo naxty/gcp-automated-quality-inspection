@@ -32,7 +32,7 @@ The tutorial consists three parts.
 Before we can train the AutoML Model we need to upload the data to GCS and prepare a CSV file with the location and labels of the data. Since AutoML is only available in the region `US-CENTRAL1`, we create a bucket in this region. Here, we require the environment variables. Bucket names in GCP are unique, therefore we prefix all bucket names with your - also unique - GCP project ID. 
 
 ```sh
-export BUCKET_LOCATION="US-CENTRAL1"
+export GCP_REGION="US-CENTRAL1"
 export GCP_PROJECT_ID="<fill-with-your-project-id>"
 export TRAINING_DATA_BUCKET="$GCP_PROJECT_ID""-product-quality"
 ``` 
@@ -59,7 +59,7 @@ data
 
 2. Create a GCS bucket and upload the data:
 ```sh
-gsutil mb -l $BUCKET_LOCATION gs://"${TRAINING_DATA_BUCKET}"
+gsutil mb -l $GCP_REGION gs://"${TRAINING_DATA_BUCKET}"
 gsutil -m cp -r data/ gs://"${TRAINING_DATA_BUCKET}"
 ```
 
@@ -126,7 +126,7 @@ Here, the `MODEL_ID` is specified by the deployed AutoML model from the previous
 
 We create the bucket and the Pub/Sub topic with
 ```
-gsutil mb -l $BUCKET_LOCATION gs://"${INBOUND_BUCKET}"
+gsutil mb -l $GCP_REGION gs://"${INBOUND_BUCKET}"
 ```
 and
 ```
@@ -174,7 +174,7 @@ Here, the name for the bucket `PREDICTION_BUCKET` can be chosen freely. The `PRE
 
 We create the prediction bucket with
 ```
-gsutil mb -l $BUCKET_LOCATION gs://"${PREDICTION_BUCKET}"
+gsutil mb -l $GCP_REGION gs://"${PREDICTION_BUCKET}"
 ```
 
 
