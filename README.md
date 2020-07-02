@@ -97,7 +97,7 @@ After the import we can see the images in AutoML.
 
 ### 2. Cloud Functions
 
-![Cloud_functions_highlevel](docs/cloud_function_highlevel.png)
+![Cloud functions highlevel view](docs/cloud_function_highlevel.png)
 
 For our setup, we require two cloud functions. The first function classifies new images via the AutoML model and publishes the prediction result to Pub/Sub. The second function takes the prediction results and distributes the inbound pictures accordingly.
 
@@ -145,6 +145,7 @@ gcloud functions deploy "$PREDICT_CF_NAME" \
 When you get an error that `service-<project-number>@gcf-admin-robot.iam.gserviceaccount.com does not have storage.objects.create access to the Google Cloud Storage object.` please add the `Storage Object Creator` to the service account. Also, allow unauthenticated invocations of new function. 
 
 #### Moving
+![Cloud Function Moving](docs/cloud_function_moving.png)
 
 The [move](cloud_functions/move) function triggers for new events on the Pub/Sub topic. Because we obtain the events from the topic directly we first have to decode the [base64](https://docs.python.org/3/library/base64.html) encoded events. Then, the function moves the picture into the respective subfolder in the prediction bucket and deletes it from the inbound bucket. Here, we explicitly check if the prediction score is above a given threshold. We move images with low score into a special folder for manual postprocessing because we only trust predictions with a high score for automated processing. The resulting folder structure looks as follows.   
 ```
