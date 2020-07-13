@@ -1,4 +1,11 @@
 # Google Cloud Platform Automated Quality Inspection
+
+## Read the blog post
+🇬🇧 [AI in Practice: Identify defective components with AutoML in the Google Cloud Platform](https://medium.com/@nico.axtmann95/ai-in-practice-identify-defective-components-with-automl-in-gcp-d984f92d3dcf?source=friends_link&sk=5eebeebe55ff4eb1e7d983149cbe1994)
+
+🇩🇪 [KI in der Praxis: Fehlerhafte Bauteile mit AutoML in der Google Cloud identifizieren](https://blog.codecentric.de/2020/07/ki-in-der-praxis-fehlerhafte-bauteile-mit-automl-in-der-google-cloud-identifizieren/)
+
+# Architecture
 ![Architecture](docs/highlevel_architecture.png)
 
 This repository is a showcase about how to leverage the Google Cloud Platform (GCP) to train and deploy a machine learning project without any deep knowledge about machine learning frameworks. 
