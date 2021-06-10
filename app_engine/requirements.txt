@@ -1,4 +1,4 @@
-fastapi==0.58.0
+fastapi==0.65.2
 pydantic==1.5.1
 starlette==0.13.4
 httptools==0.1.1
